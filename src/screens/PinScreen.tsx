@@ -1,22 +1,27 @@
 import React, {FC} from 'react';
 import {StyleSheet} from 'react-native';
 import BottomSheet, {BottomSheetScrollView} from '@gorhom/bottom-sheet';
-import {navigateToRoot} from '@/navigation';
 import Paragraph from '@/components/text/Paragraph';
 import {Header} from '@/components/common/Header';
 import {scale} from '@/functions';
 import {usePinScreen} from '@/hooks/usePinScreen';
 
 const PinScreen: FC<{id: number}> = ({id}) => {
-  const {bottomSheetRef, animatedIndex, snapPoints, data, onPressClose} =
-    usePinScreen(id);
+  const {
+    bottomSheetRef,
+    animatedIndex,
+    snapPoints,
+    data,
+    onPressClose,
+    onClose,
+  } = usePinScreen(id);
 
   return (
     <BottomSheet
       ref={bottomSheetRef}
       snapPoints={snapPoints}
       enablePanDownToClose
-      onClose={navigateToRoot}
+      onClose={onClose}
       animatedIndex={animatedIndex}>
       <BottomSheetScrollView
         contentContainerStyle={styles.contentContainerStyle}>

@@ -1,32 +1,42 @@
 import {useCallback, useEffect, useRef} from 'react';
-import MapView, {Camera} from 'react-native-maps';
+import MapView, {LatLng} from 'react-native-maps';
 import fetchData, {DataItem} from '@/api/fetchData';
 import {useAppContext} from '@/contexts/AppContext';
 import usePrevious from '@/hooks/usePrevious';
-import useSnapPoints from '@/hooks/useSnapPoints';
-import useMapPadding from '@/hooks/useMapPadding';
-import {navigateToPin} from '@/navigation';
+import {getMinMaxCoordinates, scale} from '@/functions';
 
 const ZOOM_ON_ITEM_PRESS = 1.1;
 
 export const useMainViewScreen = () => {
   const mapRef = useRef<MapView>(null);
 
-  const prevCamera = useRef<Camera>();
+  const defaultZoom = useRef<number>();
+  const defaultCoordinates = useRef<[LatLng, LatLng]>();
 
-  const {state, setData, setIsLoading} = useAppContext();
+  const {state, setData, setIsLoading, setCurrentPinId} = useAppContext();
   const {data, isLoading, currentPinId} = state;
   const previousPinId = usePrevious(currentPinId);
 
-  const mapPadding = useMapPadding();
-
-  const [snapPoint] = useSnapPoints();
-
   const fitToCoordinates = useCallback((result: DataItem[]) => {
-    const coordinates = result.map(item => ({
-      latitude: item.latitude,
-      longitude: item.longitude,
-    }));
+    const [min, max] = getMinMaxCoordinates(result);
+
+    const latitudeOffset = max.latitude - min.latitude;
+    const longitudeOffset = max.longitude - min.longitude;
+    const offset = scale(Math.min(latitudeOffset, longitudeOffset) / 5);
+
+    const coordinates: [LatLng, LatLng] = [
+      {
+        latitude: min.latitude - offset,
+        longitude: min.longitude - offset,
+      },
+      {
+        latitude: max.latitude + offset,
+        longitude: max.longitude + offset,
+      },
+    ];
+
+    defaultCoordinates.current = coordinates;
+    defaultZoom.current = undefined;
 
     mapRef.current?.fitToCoordinates(coordinates, {
       animated: true,
@@ -52,31 +62,38 @@ export const useMainViewScreen = () => {
 
   const getOnItemPress = useCallback(
     (item: DataItem) => () => {
-      mapRef.current?.getCamera().then(camera => {
-        const basicZoom = prevCamera.current
-          ? prevCamera.current.zoom
-          : camera.zoom;
-
-        if (!prevCamera.current) {
-          prevCamera.current = camera;
+      Promise.all([
+        mapRef.current?.getCamera(),
+        mapRef.current?.getMapBoundaries(),
+      ]).then(([camera, boundaries]) => {
+        if (!camera || !boundaries) {
+          return;
         }
 
-        mapRef.current?.animateCamera({
-          center: {latitude: item.latitude, longitude: item.longitude},
-          zoom: basicZoom ? basicZoom * ZOOM_ON_ITEM_PRESS : undefined,
-        });
+        if (!defaultZoom.current) {
+          defaultZoom.current = camera.zoom;
+        }
 
-        mapRef.current?.setNativeProps({
-          mapPadding: {
-            ...mapPadding,
-            bottom: mapPadding.bottom + snapPoint,
+        const newZoom = defaultZoom.current
+          ? defaultZoom.current * ZOOM_ON_ITEM_PRESS
+          : undefined;
+
+        const {northEast, southWest} = boundaries;
+        const latOffset =
+          (northEast.latitude - southWest.latitude) * (ZOOM_ON_ITEM_PRESS - 1);
+
+        mapRef.current?.animateCamera({
+          center: {
+            latitude: item.latitude - latOffset,
+            longitude: item.longitude,
           },
+          zoom: newZoom,
         });
       });
 
-      navigateToPin(item.id);
+      setCurrentPinId(item.id);
     },
-    [mapPadding, snapPoint],
+    [setCurrentPinId],
   );
 
   const isPinViewClosed =
@@ -85,14 +102,11 @@ export const useMainViewScreen = () => {
     previousPinId !== undefined;
 
   useEffect(() => {
-    if (isPinViewClosed && mapRef.current && prevCamera.current) {
-      mapRef.current.animateCamera(prevCamera.current);
-
-      mapRef.current.setNativeProps({mapPadding});
-
-      prevCamera.current = undefined;
+    if (isPinViewClosed && mapRef.current && defaultCoordinates.current) {
+      mapRef.current.fitToCoordinates(defaultCoordinates.current);
+      defaultZoom.current = undefined;
     }
-  }, [isPinViewClosed, mapPadding]);
+  }, [isPinViewClosed]);
 
   return {
     data,
@@ -101,6 +115,5 @@ export const useMainViewScreen = () => {
     mapRef,
     onMapReady,
     getOnItemPress,
-    mapPadding,
   };
 };

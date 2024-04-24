@@ -9,7 +9,7 @@ export const usePinScreen = (id: number) => {
   const animatedIndex = useSharedValue(0);
   const snapPoints = useSnapPoints();
 
-  const {state} = useAppContext();
+  const {state, setCurrentPinId} = useAppContext();
 
   const data = useMemo(() => {
     return state.data?.find(item => item.id === id);
@@ -17,11 +17,16 @@ export const usePinScreen = (id: number) => {
 
   const onPressClose = useCallback(() => bottomSheetRef.current?.close(), []);
 
+  const onClose = useCallback(() => {
+    setCurrentPinId(null);
+  }, [setCurrentPinId]);
+
   return {
     bottomSheetRef,
     animatedIndex,
     snapPoints,
     data,
     onPressClose,
+    onClose,
   };
 };

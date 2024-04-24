@@ -12,7 +12,7 @@ const CloseButton: FC<TouchableOpacityProps> = props => (
 );
 
 const Touchable = styled(TouchableOpacity)`
-  border-radius: 50%;
+  border-radius: ${scale(15)}px;
   background: rgba(0, 0, 0, 0.19);
   width: ${scale(30)}px;
   height: ${scale(30)}px;

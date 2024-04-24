@@ -5,9 +5,12 @@ import Pin from '@/components/map/Pin';
 import Loader from '@/components/common/Loader';
 import {baseCss} from '@/styles';
 import {useMainViewScreen} from '@/hooks/useMainViewScreen';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const MainViewScreen: React.FC = () => {
-  const {mapRef, data, isLoading, onMapReady, getOnItemPress, mapPadding} =
+  const insets = useSafeAreaInsets();
+
+  const {mapRef, data, isLoading, onMapReady, getOnItemPress} =
     useMainViewScreen();
 
   const markers = useMemo(() => {
@@ -29,7 +32,7 @@ const MainViewScreen: React.FC = () => {
 
   return (
     <Container>
-      <Map ref={mapRef} onMapReady={onMapReady} mapPadding={mapPadding}>
+      <Map ref={mapRef} onMapReady={onMapReady} mapPadding={insets}>
         {markers}
       </Map>
 

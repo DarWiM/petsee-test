@@ -40,7 +40,7 @@ export const NavigationRoot = () => {
     <>
       <MainViewScreen />
 
-      {currentPinId !== null && <PinScreen id={currentPinId} />}
+      {currentPinId !== null && <PinScreen />}
     </>
   );
 };

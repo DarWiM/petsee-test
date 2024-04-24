@@ -6,6 +6,7 @@ export interface IAppState {
   data: DataItem[] | null;
   isLoading: boolean;
   currentPinId: number | null;
+  isMapReady: boolean;
 }
 
 export interface IAppContext {

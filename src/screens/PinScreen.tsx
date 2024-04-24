@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React from 'react';
 import {StyleSheet} from 'react-native';
 import BottomSheet, {BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import Paragraph from '@/components/text/Paragraph';
@@ -6,7 +6,7 @@ import {Header} from '@/components/common/Header';
 import {scale} from '@/functions';
 import {usePinScreen} from '@/hooks/usePinScreen';
 
-const PinScreen: FC<{id: number}> = ({id}) => {
+const PinScreen = () => {
   const {
     bottomSheetRef,
     animatedIndex,
@@ -14,7 +14,7 @@ const PinScreen: FC<{id: number}> = ({id}) => {
     data,
     onPressClose,
     onClose,
-  } = usePinScreen(id);
+  } = usePinScreen();
 
   return (
     <BottomSheet

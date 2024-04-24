@@ -1,19 +1,18 @@
-import {useCallback, useMemo, useRef} from 'react';
+import {useCallback, useRef} from 'react';
 import {useSharedValue} from 'react-native-reanimated';
 import BottomSheet from '@gorhom/bottom-sheet';
 import useSnapPoints from '@/hooks/useSnapPoints';
 import {useAppContext} from '@/contexts/AppContext';
+import useCurrentItem from '@/hooks/useCurrentItem';
 
-export const usePinScreen = (id: number) => {
+export const usePinScreen = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const animatedIndex = useSharedValue(0);
   const snapPoints = useSnapPoints();
 
-  const {state, setCurrentPinId} = useAppContext();
+  const {setCurrentPinId} = useAppContext();
 
-  const data = useMemo(() => {
-    return state.data?.find(item => item.id === id);
-  }, [id, state.data]);
+  const data = useCurrentItem();
 
   const onPressClose = useCallback(() => bottomSheetRef.current?.close(), []);
 

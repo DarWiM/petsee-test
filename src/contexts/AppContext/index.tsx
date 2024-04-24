@@ -16,6 +16,7 @@ export const initialState: IAppState = {
   data: null,
   isLoading: false,
   currentPinId: null,
+  isMapReady: false,
 };
 
 const AppContext = createContext<IAppContext>({
@@ -43,6 +44,13 @@ const reducer = (state: IAppState, action: TActions) => {
       return {
         ...state,
         currentPinId: action.payload,
+      };
+    }
+
+    case ActionType.SET_IS_MAP_READY: {
+      return {
+        ...state,
+        isMapReady: action.payload,
       };
     }
 
@@ -74,6 +82,9 @@ export const useAppContext = () => {
       },
       setCurrentPinId: (payload: IAppState['currentPinId']) => {
         dispatch({type: ActionType.SET_CURRENT_PIN_ID, payload});
+      },
+      setIsMapReady: (payload: IAppState['isMapReady']) => {
+        dispatch({type: ActionType.SET_IS_MAP_READY, payload});
       },
     }),
     [dispatch],

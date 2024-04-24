@@ -1,21 +1,30 @@
 import React from 'react';
 import {StatusBar} from 'expo-status-bar';
-import {StyleSheet, Text, View} from 'react-native';
+import styled from 'styled-components/native';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {
+  initialWindowMetrics,
+  SafeAreaProvider,
+} from 'react-native-safe-area-context';
+import {baseCss} from '@/styles';
+import {AppContextProvider} from '@/contexts/AppContext';
+import {NavigationRoot} from '@/navigation';
 
+// noinspection JSUnusedGlobalSymbols
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <RootView>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <StatusBar style="auto" />
+        <AppContextProvider>
+          <NavigationRoot />
+        </AppContextProvider>
+      </SafeAreaProvider>
+    </RootView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const RootView = styled(GestureHandlerRootView)`
+  ${baseCss.flex};
+  background: #fff;
+`;
